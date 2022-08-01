@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Grid, TextField, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocketIoContext } from '../../context/SocketIoContext.context';
@@ -8,33 +8,111 @@ import { JOIN_ROOM, USER_JOINED_ROOM } from '../../utils/constants';
 export function ChatRoom(): JSX.Element {
   const { roomId } = useParams();
   const { socket } = useSocketIoContext();
-  const { usernameRef } = useUserContext();
+  const {
+    usernameRef: { current: username },
+  } = useUserContext();
 
   socket?.on(USER_JOINED_ROOM, (msg) => {
     console.log(msg);
   });
-  const username = usernameRef.current;
 
   useEffect(() => {
-    console.log('cu');
     socket?.emit(JOIN_ROOM, { username, roomId });
   }, []);
 
   return (
     <Box
       sx={{
-        width: '120rem',
-        height: '80rem',
-        backgroundColor: 'var(--white-one)',
+        width: '180rem',
+        height: '100rem',
+        padding: '1rem',
+        backgroundColor: 'var(--white-three)',
         borderRadius: '1rem',
         boxShadow: 'var(--box-shadow)',
-        padding: '0.5rem',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
+        transform: 'translateY(-5%)',
       }}
     >
-      <Typography variant='h6'>{roomId}</Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: '100%',
+          height: '85%',
+          borderRadius: '0.5rem',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '79.5%',
+            height: '100%',
+            backgroundColor: 'var(--white-one)',
+            borderRadius: '0.5rem 0 0 0.5rem',
+          }}
+        ></Box>
+
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '20%',
+            height: '100%',
+            backgroundColor: 'var(--white-one)',
+            borderRadius: '0 0.5rem 0.5rem 0',
+          }}
+        ></Box>
+      </Box>
+      <Box
+        sx={{
+          width: '100%',
+          height: '14.25%',
+          backgroundColor: 'var(--white-one)',
+          borderRadius: '0 0 0.5rem 0.5rem',
+          display: 'flex',
+        }}
+      >
+        <TextField
+          fullWidth
+          multiline={true}
+          rows={4}
+          InputProps={{
+            sx: {
+              fontSize: '2rem',
+              height: '100%',
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              '&:hover': {
+                border: 'none',
+              },
+            },
+          }}
+          sx={{
+            height: '100%',
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+            '&:hover': {
+              border: 'none',
+            },
+          }}
+        />
+        <Button
+          variant='contained'
+          sx={{
+            height: '100%',
+            fontSize: '3rem',
+            fontWeight: 'bold',
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }}
+        >
+          Send
+        </Button>
+      </Box>
     </Box>
   );
 }
