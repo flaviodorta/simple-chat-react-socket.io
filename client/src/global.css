@@ -8,9 +8,25 @@
 
 html {
   font-size: 62.5%;
+  color: var(--black-one);
 }
 
 :root {
   --boxShadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px,
     rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+
+  /* breakpoints */
+  --sm: 480px;
+  --md: 768px;
+  --lg: 976px;
+  --xl: 1440px;
+
+  /* colors */
+  --white-one: rgb(255, 255, 255);
+  --white-two: rgb(250, 250, 250);
+  --white-three: rgb(238, 238, 238);
+  --black-one: #121212;
+  --black-two: #181818;
+  --black-three: #282828;
+  --black-four: #404040;
 }
