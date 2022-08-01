@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { useSocketIo } from '../../hooks/useSocketIo';
-import { JOIN_ROOM, USER_JOINED_ROOM } from '../../utils/constants';
+import { useNavigate } from 'react-router-dom';
+import { useSocketIoContext } from '../../context/SocketIoContext.context';
+
+import { JOIN_ROOM } from '../../utils/constants';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
+import { useUserContext } from '../../context/UserContext.context';
 
 export function JoinRoom(): JSX.Element {
   const [username, setUsername] = useState('');
@@ -10,11 +13,14 @@ export function JoinRoom(): JSX.Element {
   const [usernameInputError, setUsernameInputError] = useState(false);
   const [roomIdInputError, setRoomIdInputError] = useState(false);
 
-  const socket = useSocketIo();
+  const { socket } = useSocketIoContext();
+  const { socketIdRef, roomIdRef, usernameRef } = useUserContext();
 
-  socket?.on(USER_JOINED_ROOM, (msg) => {
-    console.log(msg);
-  });
+  const navigate = useNavigate();
+
+  // socket?.on(USER_JOINED_ROOM, (msg) => {
+  //   console.log(msg);
+  // });
 
   const joinRoom = () => {
     if (!username) {
@@ -26,8 +32,11 @@ export function JoinRoom(): JSX.Element {
     if (username && roomId) {
       setUsernameInputError(false);
       setRoomIdInputError(false);
-      console.log(1);
-      socket?.emit(JOIN_ROOM, { username, roomId });
+      // socket?.emit(JOIN_ROOM, { username, roomId });
+      socketIdRef.current = socket?.id;
+      usernameRef.current = username;
+      roomIdRef.current = roomId;
+      navigate(`/room_${roomId}`, { replace: true });
     }
   };
 
@@ -49,7 +58,7 @@ export function JoinRoom(): JSX.Element {
         justifyContent: 'space-between',
         borderRadius: '8px',
         transform: 'translateY(-30%)',
-        boxShadow: 'var(--boxShadow)',
+        boxShadow: 'var(--box-shadow)',
       }}
       data-testid='join-room-box'
     >
