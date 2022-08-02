@@ -22,6 +22,7 @@ export function UserProvider(props: Props) {
   const usernameRef = useRef('');
   const socketIdRef = useRef('');
   const roomIdRef = useRef('');
+  
 
   return (
     <UserContext.Provider

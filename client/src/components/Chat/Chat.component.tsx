@@ -1,16 +1,33 @@
-import { Box, Button, Grid, TextField, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocketIoContext } from '../../context/SocketIoContext.context';
 import { useUserContext } from '../../context/UserContext.context';
-import { JOIN_ROOM, USER_JOINED_ROOM } from '../../utils/constants';
+import { useFetchAxios } from '../../hooks/useFetchAxios';
 
-export function ChatRoom(): JSX.Element {
+import {
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {
+  JOIN_ROOM,
+  URL_AVATAR_API,
+  USER_JOINED_ROOM,
+} from '../../utils/constants';
+
+export function Chat(): JSX.Element {
   const { roomId } = useParams();
   const { socket } = useSocketIoContext();
   const {
     usernameRef: { current: username },
   } = useUserContext();
+
+  const { response, error, isLoading } = useFetchAxios(
+    URL_AVATAR_API(username)
+  );
 
   socket?.on(USER_JOINED_ROOM, (msg) => {
     console.log(msg);
@@ -53,8 +70,15 @@ export function ChatRoom(): JSX.Element {
             height: '100%',
             backgroundColor: 'var(--white-one)',
             borderRadius: '0.5rem 0 0 0.5rem',
+            padding: '1rem',
           }}
-        ></Box>
+        >
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <Avatar src={response?.config.url} sx={{ width: 90, height: 90 }} />
+          )}
+        </Box>
 
         <Box
           sx={{

@@ -11,7 +11,7 @@ app.use(express.urlencoded());
 
 const io = socketIo(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
     methods: ['GET', 'POST'],
   },
 });
@@ -20,8 +20,6 @@ const PORT = 8000;
 
 io.on('connection', (socket) => {
   console.log(`A user ${socket.id} connected`);
-
-  // socket.broadcast.emit('user join', `User ${socket.id} enter in the room`);
 
   socket.on(JOIN_ROOM, ({ username, roomId }) => {
     console.log('cu');

@@ -18,10 +18,6 @@ export function JoinRoom(): JSX.Element {
 
   const navigate = useNavigate();
 
-  // socket?.on(USER_JOINED_ROOM, (msg) => {
-  //   console.log(msg);
-  // });
-
   const joinRoom = () => {
     if (!username) {
       setUsernameInputError(true);
@@ -32,10 +28,13 @@ export function JoinRoom(): JSX.Element {
     if (username && roomId) {
       setUsernameInputError(false);
       setRoomIdInputError(false);
-      // socket?.emit(JOIN_ROOM, { username, roomId });
+
       socketIdRef.current = socket?.id;
       usernameRef.current = username;
       roomIdRef.current = roomId;
+
+      // fetch avatar
+
       navigate(`/room_${roomId}`, { replace: true });
     }
   };
