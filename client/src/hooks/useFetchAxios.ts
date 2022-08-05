@@ -5,8 +5,8 @@ export const useFetchAxios = (
   dataUrl: string,
   options?: AxiosRequestConfig
 ) => {
-  const [response, setResponse] = useState<AxiosResponse>();
-  const [error, setError] = useState<AxiosError>();
+  const [response, setResponse] = useState<AxiosResponse | null>(null);
+  const [error, setError] = useState<AxiosError | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export const useFetchAxios = (
     fetchData();
 
     return cleanUp;
-  }, []);
+  }, [dataUrl, options]);
 
-  return { response, error, isLoading };
+  return [response, error, isLoading];
 };

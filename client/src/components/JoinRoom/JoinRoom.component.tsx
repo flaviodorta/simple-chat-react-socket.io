@@ -1,22 +1,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSocketIoContext } from '../../context/SocketIoContext.context';
+import { useSocketIoContext } from '../../context/SocketIo.context';
+import { v4 } from 'uuid';
 
-import { JOIN_ROOM } from '../../utils/constants';
+import { URL_AVATAR_API } from '../../utils/constants';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { useUserContext } from '../../context/UserContext.context';
+import { useUserContext } from '../../context/User.context';
+import { useFetchAxios } from '../../hooks/useFetchAxios';
+import { AxiosResponse } from 'axios';
 
 export function JoinRoom(): JSX.Element {
-  const [username, setUsername] = useState('');
-  const [roomId, setRoomId] = useState('');
   const [usernameInputError, setUsernameInputError] = useState(false);
   const [roomIdInputError, setRoomIdInputError] = useState(false);
 
   const { socket } = useSocketIoContext();
-  const { socketIdRef, roomIdRef, usernameRef } = useUserContext();
+  const {
+    username,
+    roomId,
+    setSocketId,
+    setUsername,
+    setRoomId,
+    setAvatarUrl,
+  } = useUserContext();
 
   const navigate = useNavigate();
+
+  const [avatarUrlResponse] = useFetchAxios(URL_AVATAR_API(username));
 
   const joinRoom = () => {
     if (!username) {
@@ -29,11 +39,17 @@ export function JoinRoom(): JSX.Element {
       setUsernameInputError(false);
       setRoomIdInputError(false);
 
-      socketIdRef.current = socket?.id;
-      usernameRef.current = username;
-      roomIdRef.current = roomId;
+      if (socket?.id) {
+        setSocketId(socket.id);
+      }
 
-      // fetch avatar
+      if (avatarUrlResponse) {
+        setAvatarUrl(
+          (avatarUrlResponse as AxiosResponse)?.config.url as string
+        );
+      } else {
+        setAvatarUrl(URL_AVATAR_API(v4()));
+      }
 
       navigate(`/room_${roomId}`, { replace: true });
     }

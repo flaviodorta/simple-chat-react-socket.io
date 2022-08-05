@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSocketIoContext } from '../../context/SocketIoContext.context';
-import { useUserContext } from '../../context/UserContext.context';
+import { useSocketIoContext } from '../../context/SocketIo.context';
+import { useUserContext } from '../../context/User.context';
 import { useFetchAxios } from '../../hooks/useFetchAxios';
 
 import {
@@ -19,15 +19,9 @@ import {
 } from '../../utils/constants';
 
 export function Chat(): JSX.Element {
-  const { roomId } = useParams();
+  const { room_id } = useParams();
   const { socket } = useSocketIoContext();
-  const {
-    usernameRef: { current: username },
-  } = useUserContext();
-
-  const { response, error, isLoading } = useFetchAxios(
-    URL_AVATAR_API(username)
-  );
+  const { username, roomId, avatarUrl } = useUserContext();
 
   socket?.on(USER_JOINED_ROOM, (msg) => {
     console.log(msg);
@@ -73,11 +67,7 @@ export function Chat(): JSX.Element {
             padding: '1rem',
           }}
         >
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <Avatar src={response?.config.url} sx={{ width: 90, height: 90 }} />
-          )}
+          <Avatar src={avatarUrl} sx={{ width: 90, height: 90 }} />
         </Box>
 
         <Box
