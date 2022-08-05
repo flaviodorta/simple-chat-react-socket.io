@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocketIoContext } from '../../context/SocketIo.context';
 import { useUserContext } from '../../context/User.context';
@@ -12,16 +12,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import {
-  JOIN_ROOM,
-  URL_AVATAR_API,
-  USER_JOINED_ROOM,
-} from '../../utils/constants';
+import { JOIN_ROOM, USER_JOINED_ROOM } from '../../utils/constants';
 
 export function Chat(): JSX.Element {
   const { room_id } = useParams();
   const { socket } = useSocketIoContext();
   const { username, roomId, avatarUrl } = useUserContext();
+  const x = useRef(1);
 
   socket?.on(USER_JOINED_ROOM, (msg) => {
     console.log(msg);
@@ -31,11 +28,16 @@ export function Chat(): JSX.Element {
     socket?.emit(JOIN_ROOM, { username, roomId });
   }, []);
 
+  useEffect(() => {
+    console.log(avatarUrl);
+    console.log(username);
+  });
+
   return (
     <Box
       sx={{
-        width: '180rem',
-        height: '100rem',
+        width: '140rem',
+        height: '80rem',
         padding: '1rem',
         backgroundColor: 'var(--white-three)',
         borderRadius: '1rem',
@@ -64,10 +66,36 @@ export function Chat(): JSX.Element {
             height: '100%',
             backgroundColor: 'var(--white-one)',
             borderRadius: '0.5rem 0 0 0.5rem',
-            padding: '1rem',
+            padding: '2rem 1rem 2rem 1rem',
           }}
         >
-          <Avatar src={avatarUrl} sx={{ width: 90, height: 90 }} />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              height: '2rem',
+              width: '100%',
+            }}
+          >
+            <Avatar src={avatarUrl} sx={{ width: 45, height: 45 }} />
+            <Typography
+              sx={{
+                margin: '0 1rem 0 1rem',
+                fontSize: '1.6rem',
+              }}
+            >
+              {username}:
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: '1.6rem',
+              }}
+            >
+              Cuzinho
+            </Typography>
+          </Box>
         </Box>
 
         <Box

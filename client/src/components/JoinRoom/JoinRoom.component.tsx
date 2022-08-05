@@ -18,9 +18,9 @@ export function JoinRoom(): JSX.Element {
   const {
     username,
     roomId,
-    setSocketId,
     setUsername,
     setRoomId,
+    setSocketId,
     setAvatarUrl,
   } = useUserContext();
 

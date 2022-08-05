@@ -1,49 +1,51 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
+import { usePersistedState } from '../hooks/usePersistedState';
+import { ContextProviderProps } from '../types/types';
 
 interface Props {
   children: React.ReactNode;
 }
 
-interface UserRefs {
+interface UserContextProps {
   socketId: string;
+  avatarUrl: string;
   username: string;
   roomId: string;
-  avatarUrl: string;
   setUsername: React.Dispatch<React.SetStateAction<string>>;
   setRoomId: React.Dispatch<React.SetStateAction<string>>;
   setSocketId: React.Dispatch<React.SetStateAction<string>>;
   setAvatarUrl: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const UserContext = createContext<UserRefs>({
+const UserContext = createContext<UserContextProps>({
   socketId: '',
+  avatarUrl: '',
   username: '',
   roomId: '',
-  avatarUrl: '',
   setUsername: () => {},
   setRoomId: () => {},
-  setSocketId: () => {},
   setAvatarUrl: () => {},
+  setSocketId: () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);
 
-export function UserProvider(props: Props) {
-  const [socketId, setSocketId] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
-  const [roomId, setRoomId] = useState<string>('');
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
+export function UserProvider(props: ContextProviderProps) {
+  const [username, setUsername] = usePersistedState<string>('username', '');
+  const [roomId, setRoomId] = usePersistedState<string>('roomId', '');
+  const [socketId, setSocketId] = usePersistedState<string>('socketId', '');
+  const [avatarUrl, setAvatarUrl] = usePersistedState<string>('avatarUrl', '');
 
   return (
     <UserContext.Provider
       value={{
         socketId,
+        avatarUrl,
         username,
         roomId,
-        avatarUrl,
-        setSocketId,
         setUsername,
         setRoomId,
+        setSocketId,
         setAvatarUrl,
       }}
     >

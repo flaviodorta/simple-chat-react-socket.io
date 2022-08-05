@@ -17,3 +17,7 @@ export interface User {
   username: string;
   roomId: string;
 }
+
+export interface ContextProviderProps {
+  children: React.ReactNode;
+}
