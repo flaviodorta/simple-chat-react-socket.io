@@ -1,5 +1,5 @@
 import { Box, Button, TextField } from '@mui/material';
-import { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { chatActions, RootState } from '../../redux/global.store';
 import { Message } from './Message.component';
@@ -13,13 +13,18 @@ export const Chat = (): JSX.Element => {
 
   const [messageContent, setMessageContent] = useState<string>('');
 
+  const textFieldMessageRef = useRef<HTMLDivElement>(null);
+
   const sendMessage = () => {
+    console.log(username);
     dispatch(
       chatActions.setMessages([
         ...messages,
         { avatarUrl, username, content: messageContent },
       ])
     );
+
+    // textFieldMessageRef?.current.value = 'cu';
   };
 
   return (
@@ -90,6 +95,7 @@ export const Chat = (): JSX.Element => {
         }}
       >
         <TextField
+          ref={textFieldMessageRef}
           fullWidth
           multiline={true}
           rows={4}

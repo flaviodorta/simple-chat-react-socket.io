@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocketIoContext } from '../../context/SocketIo.context';
 import { useFetchAxios } from '../../hooks/useFetchAxios';
@@ -11,6 +11,7 @@ import { userActions } from '../../redux/global.store';
 import { URL_AVATAR_API } from '../../utils/constants';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
+import { join } from 'path';
 
 export const JoinRoom = (): JSX.Element => {
   const { socket } = useSocketIoContext();
@@ -41,6 +42,9 @@ export const JoinRoom = (): JSX.Element => {
       setUsernameInputError(false);
       setRoomIdInputError(false);
 
+      dispatch(userActions.setUsername(username));
+      dispatch(userActions.setRoomId(roomId));
+
       if (socket?.id) {
         dispatch(userActions.setSocketId(socket.id));
       }
@@ -58,6 +62,12 @@ export const JoinRoom = (): JSX.Element => {
       navigate(`/room_${roomId}`, { replace: true });
     }
   };
+
+  useEffect(() => {
+    if (window) {
+      document.addEventListener('enter', joinRoom);
+    }
+  });
 
   return (
     <Box
@@ -111,6 +121,7 @@ export const JoinRoom = (): JSX.Element => {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           onFocus={removeErrorFromInput}
+          onKeyDown={(e) => (e.key === 'enter' ? joinRoom : null)}
           size='medium'
           error={usernameInputError}
           sx={{
@@ -125,6 +136,7 @@ export const JoinRoom = (): JSX.Element => {
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
           onFocus={removeErrorFromInput}
+          onKeyDown={(e) => (e.key === '13' ? joinRoom : null)}
           error={roomIdInputError}
           sx={{
             width: '100%',
