@@ -1,37 +1,26 @@
-import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { useSocketIoContext } from '../../context/SocketIo.context';
-import { useUserContext } from '../../context/User.context';
-import { useFetchAxios } from '../../hooks/useFetchAxios';
+import { Box, Button, TextField } from '@mui/material';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { chatActions, RootState } from '../../redux/global.store';
+import { Message } from './Message.component';
 
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { JOIN_ROOM, USER_JOINED_ROOM } from '../../utils/constants';
+export const Chat = (): JSX.Element => {
+  const dispatch = useDispatch();
+  const {
+    chat: { messages, users },
+    user: { username, roomId, avatarUrl },
+  } = useSelector((state: RootState) => state);
 
-export function Chat(): JSX.Element {
-  const { room_id } = useParams();
-  const { socket } = useSocketIoContext();
-  const { username, roomId, avatarUrl } = useUserContext();
-  const x = useRef(1);
+  const [messageContent, setMessageContent] = useState<string>('');
 
-  socket?.on(USER_JOINED_ROOM, (msg) => {
-    console.log(msg);
-  });
-
-  useEffect(() => {
-    socket?.emit(JOIN_ROOM, { username, roomId });
-  }, []);
-
-  useEffect(() => {
-    console.log(avatarUrl);
-    console.log(username);
-  });
+  const sendMessage = () => {
+    dispatch(
+      chatActions.setMessages([
+        ...messages,
+        { avatarUrl, username, content: messageContent },
+      ])
+    );
+  };
 
   return (
     <Box
@@ -61,7 +50,8 @@ export function Chat(): JSX.Element {
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
             width: '79.5%',
             height: '100%',
             backgroundColor: 'var(--white-one)',
@@ -69,33 +59,14 @@ export function Chat(): JSX.Element {
             padding: '2rem 1rem 2rem 1rem',
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              height: '2rem',
-              width: '100%',
-            }}
-          >
-            <Avatar src={avatarUrl} sx={{ width: 45, height: 45 }} />
-            <Typography
-              sx={{
-                margin: '0 1rem 0 1rem',
-                fontSize: '1.6rem',
-              }}
-            >
-              {username}:
-            </Typography>
-
-            <Typography
-              sx={{
-                fontSize: '1.6rem',
-              }}
-            >
-              Cuzinho
-            </Typography>
-          </Box>
+          {messages.map((message, idx) => (
+            <Message
+              key={idx}
+              avatarUrl={message.avatarUrl}
+              username={message.username}
+              content={message.content}
+            />
+          ))}
         </Box>
 
         <Box
@@ -122,6 +93,7 @@ export function Chat(): JSX.Element {
           fullWidth
           multiline={true}
           rows={4}
+          onChange={(e) => setMessageContent(e.target.value)}
           InputProps={{
             sx: {
               fontSize: '2rem',
@@ -144,6 +116,7 @@ export function Chat(): JSX.Element {
         />
         <Button
           variant='contained'
+          onClick={sendMessage}
           sx={{
             height: '100%',
             fontSize: '3rem',
@@ -157,4 +130,4 @@ export function Chat(): JSX.Element {
       </Box>
     </Box>
   );
-}
+};

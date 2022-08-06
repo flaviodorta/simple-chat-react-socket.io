@@ -1,32 +1,34 @@
+import { AxiosResponse } from 'axios';
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocketIoContext } from '../../context/SocketIo.context';
+import { useFetchAxios } from '../../hooks/useFetchAxios';
 import { v4 } from 'uuid';
+import { useDispatch } from 'react-redux';
+import { userActions } from '../../redux/global.store';
 
 import { URL_AVATAR_API } from '../../utils/constants';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { useUserContext } from '../../context/User.context';
-import { useFetchAxios } from '../../hooks/useFetchAxios';
-import { AxiosResponse } from 'axios';
 
-export function JoinRoom(): JSX.Element {
+export const JoinRoom = (): JSX.Element => {
+  const { socket } = useSocketIoContext();
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [username, setUsername] = useState('');
+  const [roomId, setRoomId] = useState('');
   const [usernameInputError, setUsernameInputError] = useState(false);
   const [roomIdInputError, setRoomIdInputError] = useState(false);
 
-  const { socket } = useSocketIoContext();
-  const {
-    username,
-    roomId,
-    setUsername,
-    setRoomId,
-    setSocketId,
-    setAvatarUrl,
-  } = useUserContext();
-
-  const navigate = useNavigate();
-
   const [avatarUrlResponse] = useFetchAxios(URL_AVATAR_API(username));
+
+  const removeErrorFromInput = () => {
+    setUsernameInputError(false);
+    setRoomIdInputError(false);
+  };
 
   const joinRoom = () => {
     if (!username) {
@@ -40,24 +42,21 @@ export function JoinRoom(): JSX.Element {
       setRoomIdInputError(false);
 
       if (socket?.id) {
-        setSocketId(socket.id);
+        dispatch(userActions.setSocketId(socket.id));
       }
 
       if (avatarUrlResponse) {
-        setAvatarUrl(
-          (avatarUrlResponse as AxiosResponse)?.config.url as string
+        dispatch(
+          userActions.setAvatarUrl(
+            (avatarUrlResponse as AxiosResponse)?.config.url as string
+          )
         );
       } else {
-        setAvatarUrl(URL_AVATAR_API(v4()));
+        dispatch(userActions.setAvatarUrl(URL_AVATAR_API(v4())));
       }
 
       navigate(`/room_${roomId}`, { replace: true });
     }
-  };
-
-  const removeErrorFromInput = () => {
-    setUsernameInputError(false);
-    setRoomIdInputError(false);
   };
 
   return (
@@ -154,4 +153,4 @@ export function JoinRoom(): JSX.Element {
       </Box>
     </Box>
   );
-}
+};

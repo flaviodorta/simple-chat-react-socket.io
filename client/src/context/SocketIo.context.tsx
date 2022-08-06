@@ -1,10 +1,7 @@
 import { createContext, useContext, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { ContextProviderProps } from '../types/types';
 import { RECONNECT_DELAY, URL_SERVER } from '../utils/constants';
-
-interface Props {
-  children: React.ReactNode;
-}
 
 interface Context {
   socket: Socket | null;
@@ -16,7 +13,7 @@ const SocketIoContext = createContext<Context>({
 
 export const useSocketIoContext = () => useContext(SocketIoContext);
 
-export function SocketIoProvider(props: Props): JSX.Element {
+export const SocketIoProvider = (props: ContextProviderProps): JSX.Element => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -35,4 +32,4 @@ export function SocketIoProvider(props: Props): JSX.Element {
       {props.children}
     </SocketIoContext.Provider>
   );
-}
+};

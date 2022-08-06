@@ -18,6 +18,12 @@ export interface User {
   roomId: string;
 }
 
+export interface Message {
+  avatarUrl: string;
+  username: string;
+  content: string;
+}
+
 export interface ContextProviderProps {
   children: React.ReactNode;
 }
