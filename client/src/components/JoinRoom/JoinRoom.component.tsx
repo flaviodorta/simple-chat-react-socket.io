@@ -15,8 +15,6 @@ import { resetState } from '../../redux/actions/global.action';
 import { nanoid } from '@reduxjs/toolkit';
 
 export const JoinRoom = (): JSX.Element => {
-  const { socket } = useSocketIoContext();
-
   const dispatch = useDispatch();
   const thunkDispatch = useThunkDispatch();
   const navigate = useNavigate();
