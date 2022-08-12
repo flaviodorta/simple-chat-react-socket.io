@@ -1,22 +1,24 @@
 import { AxiosResponse } from 'axios';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocketIoContext } from '../../context/SocketIo.context';
 import { useFetchAxios } from '../../hooks/useFetchAxios';
-import { v4 } from 'uuid';
 import { useDispatch } from 'react-redux';
-import { userActions } from '../../redux/global.store';
+import { userActions, useThunkDispatch } from '../../redux/global.store';
 
 import { URL_AVATAR_API } from '../../utils/constants';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { join } from 'path';
+// import { useOnKeyPress } from '../../hooks/useOnKeyPress';
+import { resetState } from '../../redux/actions/global.action';
+import { nanoid } from '@reduxjs/toolkit';
 
 export const JoinRoom = (): JSX.Element => {
   const { socket } = useSocketIoContext();
 
   const dispatch = useDispatch();
+  const thunkDispatch = useThunkDispatch();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
@@ -31,7 +33,7 @@ export const JoinRoom = (): JSX.Element => {
     setRoomIdInputError(false);
   };
 
-  const joinRoom = () => {
+  const joinRoom = useCallback(() => {
     if (!username) {
       setUsernameInputError(true);
     }
@@ -43,11 +45,6 @@ export const JoinRoom = (): JSX.Element => {
       setRoomIdInputError(false);
 
       dispatch(userActions.setUsername(username));
-      dispatch(userActions.setRoomId(roomId));
-
-      if (socket?.id) {
-        dispatch(userActions.setSocketId(socket.id));
-      }
 
       if (avatarUrlResponse) {
         dispatch(
@@ -56,18 +53,35 @@ export const JoinRoom = (): JSX.Element => {
           )
         );
       } else {
-        dispatch(userActions.setAvatarUrl(URL_AVATAR_API(v4())));
+        dispatch(userActions.setAvatarUrl(URL_AVATAR_API(nanoid())));
       }
 
       navigate(`/room_${roomId}`, { replace: true });
     }
-  };
+  }, [avatarUrlResponse, dispatch, navigate, roomId, username]);
+
+  const joinRoomOnEnter = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        joinRoom();
+      }
+    },
+    [joinRoom]
+  );
 
   useEffect(() => {
-    if (window) {
-      document.addEventListener('enter', joinRoom);
-    }
+    window.addEventListener('keypress', joinRoomOnEnter);
+
+    return () => {
+      window.removeEventListener('keypress', joinRoomOnEnter);
+    };
   });
+
+  useEffect(() => {
+    thunkDispatch(resetState());
+  });
+
+  // useOnKeyPress('Enter', joinRoom);
 
   return (
     <Box

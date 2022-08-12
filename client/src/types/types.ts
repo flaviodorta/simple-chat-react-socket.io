@@ -1,3 +1,5 @@
+import { AnyAction, ThunkAction } from '@reduxjs/toolkit';
+import { RootState } from '../redux/global.store';
 import { JOIN_ROOM } from '../utils/constants';
 
 export interface ServerToClientEvents {}
@@ -12,8 +14,16 @@ export interface ClientToServerEvents {
   }) => void;
 }
 
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  AnyAction
+>;
+
 export interface User {
   socketId: string;
+  avatarUrl: string;
   username: string;
   roomId: string;
 }

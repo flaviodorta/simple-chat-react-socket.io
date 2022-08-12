@@ -5,16 +5,12 @@ export const userSlice = createSlice({
   name: 'User State',
   initialState: usersInitialState,
   reducers: {
-    setSocketId(state, action: PayloadAction<string>) {
-      state.socketId = action.payload;
+    setRoomId(state, action: PayloadAction<string>) {
+      state.roomId = action.payload;
     },
 
     setAvatarUrl(state, action: PayloadAction<string>) {
       state.avatarUrl = action.payload;
-    },
-
-    setRoomId(state, action: PayloadAction<string>) {
-      state.roomId = action.payload;
     },
 
     setUsername(state, action: PayloadAction<string>) {

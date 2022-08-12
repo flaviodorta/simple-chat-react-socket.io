@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef } from 'react';
+import { createContext, useContext } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ContextProviderProps } from '../types/types';
 import { RECONNECT_DELAY, URL_SERVER } from '../utils/constants';
@@ -13,22 +13,19 @@ const SocketIoContext = createContext<Context>({
 
 export const useSocketIoContext = () => useContext(SocketIoContext);
 
+const socket = io(URL_SERVER);
+
+socket.on('connect', () => {
+  console.log(socket.id);
+});
+
+socket.on('connect_error', () => {
+  setTimeout(() => socket.connect(), RECONNECT_DELAY);
+});
+
 export const SocketIoProvider = (props: ContextProviderProps): JSX.Element => {
-  const socketRef = useRef<Socket | null>(null);
-
-  useEffect(() => {
-    const connectedSocket = io(URL_SERVER);
-    socketRef.current = connectedSocket;
-    connectedSocket.on('connect', () => {
-      console.log(connectedSocket.id);
-    });
-    connectedSocket.on('connect_error', () => {
-      setTimeout(() => connectedSocket.connect(), RECONNECT_DELAY);
-    });
-  }, []);
-
   return (
-    <SocketIoContext.Provider value={{ socket: socketRef.current }}>
+    <SocketIoContext.Provider value={{ socket }}>
       {props.children}
     </SocketIoContext.Provider>
   );

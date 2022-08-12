@@ -1,13 +1,11 @@
 export interface UserInitialState {
-  socketId: string;
+  roomId?: string;
   avatarUrl: string;
-  roomId: string;
   username: string;
 }
 
 export const usersInitialState: UserInitialState = {
-  socketId: '',
-  avatarUrl: '',
   roomId: '',
+  avatarUrl: '',
   username: '',
 };

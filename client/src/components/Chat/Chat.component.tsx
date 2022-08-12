@@ -1,11 +1,18 @@
-import { Box, Button, TextField } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSocketIoContext } from '../../context/SocketIo.context';
 import { chatActions, RootState } from '../../redux/global.store';
+
+import { User } from '../../types/types';
+
+import { Box, Button } from '@mui/material';
+import { UserCard } from './UserCard.component';
 import { Message } from './Message.component';
 
 export const Chat = (): JSX.Element => {
+  const { socket } = useSocketIoContext();
   const dispatch = useDispatch();
+
   const {
     chat: { messages, users },
     user: { username, roomId, avatarUrl },
@@ -13,19 +20,100 @@ export const Chat = (): JSX.Element => {
 
   const [messageContent, setMessageContent] = useState<string>('');
 
-  const textFieldMessageRef = useRef<HTMLDivElement>(null);
+  const textFieldMessageRef = useRef<HTMLTextAreaElement>(null);
 
-  const sendMessage = () => {
-    console.log(username);
-    dispatch(
-      chatActions.setMessages([
-        ...messages,
-        { avatarUrl, username, content: messageContent },
-      ])
+  const dispatchMessage = useCallback(
+    (avatarUrl: string, username: string, content: string) => {
+      dispatch(chatActions.addMessage({ avatarUrl, username, content }));
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    console.log(messages);
+  });
+
+  useEffect(() => {
+    socket?.emit('user join room', { roomId, avatarUrl, username });
+
+    socket?.emit('user joined room', { roomId, avatarUrl, username });
+
+    socket?.on(
+      'user send message',
+      ({ avatarUrl, username, messageContent }) => {
+        dispatchMessage(avatarUrl, username, messageContent);
+      }
     );
+  }, []);
 
-    // textFieldMessageRef?.current.value = 'cu';
-  };
+  useEffect(() => {
+    socket?.on('user joined room', ({ avatarUrl, username }) => {
+      console.log(`${username} joined the room`);
+
+      dispatch(chatActions.addUser({ avatarUrl, username } as User));
+    });
+
+    socket?.on('users in the room', (users) => {
+      dispatch(chatActions.setUsers([...users]));
+    });
+  }, []);
+
+  const sendMessage = useCallback(() => {
+    if (messageContent) {
+      socket?.emit('user send message', {
+        roomId,
+        avatarUrl,
+        username,
+        messageContent,
+      });
+      dispatchMessage(avatarUrl, username, messageContent);
+      setMessageContent('');
+    }
+
+    textFieldMessageRef.current?.focus();
+  }, [
+    messageContent,
+    textFieldMessageRef,
+    username,
+    avatarUrl,
+    socket,
+    roomId,
+    dispatchMessage,
+  ]);
+
+  const sendMessageOnEnter = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    },
+    [sendMessage]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keypress', sendMessageOnEnter);
+
+    return () => {
+      window.removeEventListener('keypress', sendMessageOnEnter);
+    };
+  });
+
+  const enterTextOnKeyPress = useCallback((e: KeyboardEvent) => {
+    if (document.activeElement !== textFieldMessageRef.current) {
+      if (e.key !== 'Enter') {
+        textFieldMessageRef.current?.focus();
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('keypress', enterTextOnKeyPress);
+
+    return () => {
+      window.removeEventListener('keypress', enterTextOnKeyPress);
+    };
+  });
 
   return (
     <Box
@@ -48,8 +136,9 @@ export const Chat = (): JSX.Element => {
           display: 'flex',
           justifyContent: 'space-between',
           width: '100%',
-          height: '85%',
+          height: '89%',
           borderRadius: '0.5rem',
+          overflow: 'hidden',
         }}
       >
         <Box
@@ -57,11 +146,12 @@ export const Chat = (): JSX.Element => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
-            width: '79.5%',
+            width: '84.5%',
             height: '100%',
             backgroundColor: 'var(--white-one)',
             borderRadius: '0.5rem 0 0 0.5rem',
             padding: '2rem 1rem 2rem 1rem',
+            overflowY: 'scroll',
           }}
         >
           {messages.map((message, idx) => (
@@ -77,48 +167,44 @@ export const Chat = (): JSX.Element => {
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
-            width: '20%',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            width: '15%',
             height: '100%',
             backgroundColor: 'var(--white-one)',
             borderRadius: '0 0.5rem 0.5rem 0',
+            paddingLeft: '0.5rem',
+            overflowY: 'scroll',
           }}
-        ></Box>
+        >
+          {users.map((user, idx) => (
+            <UserCard
+              key={idx}
+              avatarUrl={user.avatarUrl}
+              username={user.username}
+            />
+          ))}
+        </Box>
       </Box>
       <Box
         sx={{
           width: '100%',
-          height: '14.25%',
+          height: '10%',
           backgroundColor: 'var(--white-one)',
           borderRadius: '0 0 0.5rem 0.5rem',
           display: 'flex',
         }}
       >
-        <TextField
+        <textarea
           ref={textFieldMessageRef}
-          fullWidth
-          multiline={true}
-          rows={4}
+          style={{
+            width: '100%',
+            padding: '.25rem',
+            outline: 'none',
+            resize: 'none',
+          }}
+          value={messageContent}
           onChange={(e) => setMessageContent(e.target.value)}
-          InputProps={{
-            sx: {
-              fontSize: '2rem',
-              height: '100%',
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0,
-              '&:hover': {
-                border: 'none',
-              },
-            },
-          }}
-          sx={{
-            height: '100%',
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
-            '&:hover': {
-              border: 'none',
-            },
-          }}
         />
         <Button
           variant='contained'
