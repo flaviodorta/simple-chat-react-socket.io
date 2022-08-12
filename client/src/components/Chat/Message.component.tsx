@@ -4,7 +4,7 @@ import { memo } from 'react';
 interface Props {
   avatarUrl: string;
   username: string;
-  content: string;
+  messageContent: string;
 }
 
 export const Message = memo((props: Props): JSX.Element => {
@@ -34,7 +34,7 @@ export const Message = memo((props: Props): JSX.Element => {
           fontSize: '1.6rem',
         }}
       >
-        {props.content}
+        {props.messageContent}
       </Typography>
     </Box>
   );

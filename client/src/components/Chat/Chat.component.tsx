@@ -23,20 +23,19 @@ export const Chat = (): JSX.Element => {
   const textFieldMessageRef = useRef<HTMLTextAreaElement>(null);
 
   const dispatchMessage = useCallback(
-    (avatarUrl: string, username: string, content: string) => {
-      dispatch(chatActions.addMessage({ avatarUrl, username, content }));
+    (avatarUrl: string, username: string, messageContent: string) => {
+      dispatch(chatActions.addMessage({ avatarUrl, username, messageContent }));
     },
     [dispatch]
   );
 
+  console.log(messages);
   useEffect(() => {
-    console.log(messages);
-  });
-
-  useEffect(() => {
-    socket?.emit('user join room', { roomId, avatarUrl, username });
-
     socket?.emit('user joined room', { roomId, avatarUrl, username });
+
+    socket?.on('user joined room', ({ avatarUrl, username }) => {
+      dispatch(chatActions.addUser({ avatarUrl, username } as User));
+    });
 
     socket?.on(
       'user send message',
@@ -44,18 +43,6 @@ export const Chat = (): JSX.Element => {
         dispatchMessage(avatarUrl, username, messageContent);
       }
     );
-  }, []);
-
-  useEffect(() => {
-    socket?.on('user joined room', ({ avatarUrl, username }) => {
-      console.log(`${username} joined the room`);
-
-      dispatch(chatActions.addUser({ avatarUrl, username } as User));
-    });
-
-    socket?.on('users in the room', (users) => {
-      dispatch(chatActions.setUsers([...users]));
-    });
   }, []);
 
   const sendMessage = useCallback(() => {
@@ -66,7 +53,6 @@ export const Chat = (): JSX.Element => {
         username,
         messageContent,
       });
-      dispatchMessage(avatarUrl, username, messageContent);
       setMessageContent('');
     }
 
@@ -78,7 +64,6 @@ export const Chat = (): JSX.Element => {
     avatarUrl,
     socket,
     roomId,
-    dispatchMessage,
   ]);
 
   const sendMessageOnEnter = useCallback(
@@ -159,7 +144,7 @@ export const Chat = (): JSX.Element => {
               key={idx}
               avatarUrl={message.avatarUrl}
               username={message.username}
-              content={message.content}
+              messageContent={message.messageContent}
             />
           ))}
         </Box>

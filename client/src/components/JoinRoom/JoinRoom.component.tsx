@@ -4,8 +4,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocketIoContext } from '../../context/SocketIo.context';
 import { useFetchAxios } from '../../hooks/useFetchAxios';
-import { useDispatch } from 'react-redux';
-import { userActions, useThunkDispatch } from '../../redux/global.store';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  chatActions,
+  RootState,
+  userActions,
+  useThunkDispatch,
+} from '../../redux/global.store';
 
 import { URL_AVATAR_API } from '../../utils/constants';
 
@@ -15,6 +20,8 @@ import { resetState } from '../../redux/actions/global.action';
 import { nanoid } from '@reduxjs/toolkit';
 
 export const JoinRoom = (): JSX.Element => {
+  const { socket } = useSocketIoContext();
+
   const dispatch = useDispatch();
   const thunkDispatch = useThunkDispatch();
   const navigate = useNavigate();
@@ -42,7 +49,9 @@ export const JoinRoom = (): JSX.Element => {
       setUsernameInputError(false);
       setRoomIdInputError(false);
 
+      dispatch(userActions.setUserId(nanoid()));
       dispatch(userActions.setUsername(username));
+      dispatch(userActions.setRoomId(roomId));
 
       if (avatarUrlResponse) {
         dispatch(
@@ -54,9 +63,20 @@ export const JoinRoom = (): JSX.Element => {
         dispatch(userActions.setAvatarUrl(URL_AVATAR_API(nanoid())));
       }
 
+      socket?.emit('user join room', { roomId });
+
+      socket?.on('send all users', ({ allUsers }) => {
+        dispatch(chatActions.setUsers(allUsers));
+      });
+
+      socket?.on('send all messages', ({ allMessages }) => {
+        console.log(allMessages);
+        dispatch(chatActions.setMessages(allMessages));
+      });
+
       navigate(`/room_${roomId}`, { replace: true });
     }
-  }, [avatarUrlResponse, dispatch, navigate, roomId, username]);
+  }, [avatarUrlResponse, dispatch, navigate, roomId, username, socket]);
 
   const joinRoomOnEnter = useCallback(
     (e: KeyboardEvent) => {

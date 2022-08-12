@@ -31,7 +31,7 @@ export interface User {
 export interface Message {
   avatarUrl: string;
   username: string;
-  content: string;
+  messageContent: string;
 }
 
 export interface ContextProviderProps {

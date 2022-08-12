@@ -5,6 +5,10 @@ export const userSlice = createSlice({
   name: 'User State',
   initialState: usersInitialState,
   reducers: {
+    setUserId(state, action: PayloadAction<string>) {
+      state.userId = action.payload;
+    },
+
     setRoomId(state, action: PayloadAction<string>) {
       state.roomId = action.payload;
     },
